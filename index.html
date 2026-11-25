@@ -1,0 +1,271 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador de Terremoto VR</title>
+
+<style>
+body {
+    margin: 0;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    background: #111;
+}
+#panel {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    z-index: 10;
+    background: rgba(0,0,0,0.85);
+    color: white;
+    padding: 15px;
+    border-radius: 12px;
+    max-width: 320px;
+}
+button {
+    padding: 12px;
+    margin: 5px 2px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+#start { background: #d62828; color: white; }
+#stop { background: #198754; color: white; }
+#status { color: #ffd166; font-weight: bold; }
+</style>
+</head>
+
+<body>
+
+<div id="panel">
+<h2>🚨 Simulador Sísmico</h2>
+<p>Capacitación para brigadistas</p>
+<p id="status">Estado: Normal</p>
+<button id="start">INICIAR TERREMOTO</button>
+<button id="stop">DETENER</button>
+<p style="font-size:13px">Explora el escenario 3D.</p>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { VRButton } from 'three/addons/webxr/VRButton.js';
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x87ceeb);
+scene.fog = new THREE.Fog(0x87ceeb, 50, 180);
+
+const camera = new THREE.PerspectiveCamera(
+    75, window.innerWidth/window.innerHeight, 0.1, 500
+);
+camera.position.set(0, 4, 15);
+
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.xr.enabled = true;
+renderer.shadowMap.enabled = true;
+document.body.appendChild(renderer.domElement);
+document.body.appendChild(VRButton.createButton(renderer));
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 2));
+
+const sun = new THREE.DirectionalLight(0xffffff, 2);
+sun.position.set(20,30,10);
+sun.castShadow = true;
+scene.add(sun);
+
+// Suelo
+const ground = new THREE.Mesh(
+    new THREE.PlaneGeometry(200,200),
+    new THREE.MeshStandardMaterial({color:0x777777})
+);
+ground.rotation.x = -Math.PI/2;
+ground.position.y = -0.1;
+ground.receiveShadow = true;
+scene.add(ground);
+
+// Calle
+const road = new THREE.Mesh(
+    new THREE.PlaneGeometry(18,100),
+    new THREE.MeshStandardMaterial({color:0x303030})
+);
+road.rotation.x = -Math.PI/2;
+road.position.y = 0.01;
+road.receiveShadow = true;
+scene.add(road);
+
+// Líneas de calle
+for(let z=-45; z<45; z+=8){
+    const line = new THREE.Mesh(
+        new THREE.BoxGeometry(0.3,0.03,3),
+        new THREE.MeshStandardMaterial({color:0xffffff})
+    );
+    line.position.set(0,0.04,z);
+    scene.add(line);
+}
+
+// Banquetas
+for(let side of [-1,1]){
+    const sidewalk = new THREE.Mesh(
+        new THREE.BoxGeometry(5,0.3,100),
+        new THREE.MeshStandardMaterial({color:0x999999})
+    );
+    sidewalk.position.set(side*11,0.1,0);
+    scene.add(sidewalk);
+}
+
+// Edificios
+const buildings = [];
+
+function building(x,z,w,h,d,color){
+    const group = new THREE.Group();
+
+    const body = new THREE.Mesh(
+        new THREE.BoxGeometry(w,h,d),
+        new THREE.MeshStandardMaterial({color:color})
+    );
+    body.position.y=h/2;
+    body.castShadow=true;
+    body.receiveShadow=true;
+    group.add(body);
+
+    // Ventanas
+    for(let y=3;y<h-1;y+=4){
+        for(let xx=-w/2+1;xx<w/2-1;xx+=3){
+            const win = new THREE.Mesh(
+                new THREE.BoxGeometry(1.3,1.8,0.12),
+                new THREE.MeshStandardMaterial({color:0x263b50})
+            );
+            win.position.set(xx,y,d/2+0.08);
+            group.add(win);
+        }
+    }
+
+    group.position.set(x,0,z);
+    scene.add(group);
+    buildings.push(group);
+}
+
+building(-16,-10,10,18,12,0xb8b0a2);
+building(-18,-35,12,24,12,0x888888);
+building(-16,20,10,14,12,0xc0c0c0);
+building(16,-15,10,22,12,0xb5a18a);
+building(18,-40,12,28,12,0x777777);
+building(16,22,10,16,12,0x9b9b9b);
+
+// Escombros
+function debris(x,y,z,size){
+    const mesh = new THREE.Mesh(
+        new THREE.BoxGeometry(size,size*0.7,size),
+        new THREE.MeshStandardMaterial({color:0x777777})
+    );
+    mesh.rotation.set(Math.random(),Math.random(),Math.random());
+    mesh.position.set(x,y,z);
+    mesh.castShadow=true;
+    scene.add(mesh);
+}
+
+for(let i=0;i<40;i++){
+    debris(
+        (Math.random()*30-15),
+        0.4,
+        (Math.random()*80-40),
+        Math.random()*1.5+0.4
+    );
+}
+
+// Grietas visuales en pavimento
+function crack(points){
+    const geometry = new THREE.BufferGeometry().setFromPoints(
+        points.map(p=>new THREE.Vector3(p[0],0.08,p[1]))
+    );
+    const line = new THREE.Line(
+        geometry,
+        new THREE.LineBasicMaterial({color:0x111111})
+    );
+    scene.add(line);
+}
+
+crack([[-4,-10],[-3,-7],[-5,-5],[-2,-2],[0,3],[3,6]]);
+crack([[5,-30],[3,-25],[6,-20],[4,-15],[8,-12]]);
+crack([[-8,10],[-6,13],[-9,16],[-5,20],[-7,25]]);
+crack([[1,15],[2,18],[0,21],[3,25],[2,30]]);
+crack([[-2,-35],[1,-32],[-1,-28],[2,-24]]);
+
+// Árboles
+function tree(x,z){
+    const trunk = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.3,0.5,3),
+        new THREE.MeshStandardMaterial({color:0x654321})
+    );
+    trunk.position.set(x,1.5,z);
+    scene.add(trunk);
+
+    const crown = new THREE.Mesh(
+        new THREE.SphereGeometry(2.2,12,12),
+        new THREE.MeshStandardMaterial({color:0x28652b})
+    );
+    crown.position.set(x,4,z);
+    scene.add(crown);
+}
+
+tree(-12,-5);
+tree(12,5);
+tree(-12,25);
+tree(12,-25);
+
+// Control del terremoto
+let shaking = false;
+let intensity = 0;
+
+document.getElementById('start').onclick = () => {
+    shaking = true;
+    intensity = 0.8;
+    document.getElementById('status').textContent =
+        'Estado: TERREMOTO ⚠️';
+};
+
+document.getElementById('stop').onclick = () => {
+    shaking = false;
+    intensity = 0;
+    camera.position.set(0,4,15);
+    document.getElementById('status').textContent =
+        'Estado: Movimiento detenido';
+};
+
+// Animación
+renderer.setAnimationLoop(() => {
+    if(shaking){
+        camera.position.x = (Math.random()-0.5)*intensity;
+        camera.position.y = 4+(Math.random()-0.5)*intensity;
+        camera.rotation.z = (Math.random()-0.5)*0.04;
+    }else{
+        camera.position.x += (0-camera.position.x)*0.05;
+        camera.position.y += (4-camera.position.y)*0.05;
+        camera.rotation.z += (0-camera.rotation.z)*0.05;
+    }
+
+    renderer.render(scene,camera);
+});
+
+// Tamaño de pantalla
+window.addEventListener('resize',()=>{
+    camera.aspect=window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth,window.innerHeight);
+});
+</script>
+</body>
+</html>
