@@ -3,118 +3,115 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>SIMUS | Experiencia Sísmica 3D</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIMUS 3.0 | Instituto Tecnológico de Puebla</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;overflow:hidden;background:#111;color:white;font-family:Arial}
-canvas{display:block}
+body{margin:0;overflow:hidden;background:#111;font-family:Arial;color:white}
 #hud{
-position:fixed;top:15px;left:15px;width:330px;
-padding:18px;background:rgba(8,15,24,.94);
-border:1px solid #43566a;border-radius:14px;
-z-index:5;box-shadow:0 10px 40px #0008
+position:fixed;top:12px;left:12px;width:300px;max-height:90vh;
+overflow:auto;background:rgba(8,15,24,.93);padding:16px;
+border:1px solid #3b5369;border-radius:14px;z-index:5
 }
-h1{font-size:22px;margin:0 0 5px;color:#55d7ff}
-.sub{font-size:12px;color:#a5b7c8;margin-bottom:15px}
-.status{color:#ffd166;font-weight:bold;margin:12px 0}
-button{
-padding:11px;border:0;border-radius:7px;color:white;
-font-weight:bold;cursor:pointer;background:#1479ff;
-margin:4px 2px
-}
-.red{background:#d93645}
-.green{background:#159767}
-.orange{background:#d68b26}
-.dark{background:#29394b}
-.info{font-size:12px;color:#d0dfed;line-height:1.6}
+h1{color:#40d8ff;font-size:21px;margin:0}
+.small{font-size:11px;color:#a9bfd0;line-height:1.6}
 .metric{background:#172534;padding:10px;border-radius:8px;margin:8px 0}
-#mission{
-position:fixed;top:15px;right:15px;width:280px;
-background:rgba(8,15,24,.92);border:1px solid #43566a;
-border-radius:12px;padding:15px;z-index:5
-}
-#mission h3{color:#55d7ff;margin-top:0}
-#crosshair{
-position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
-color:white;font-size:26px;pointer-events:none
-}
-#instructions{
-position:fixed;bottom:15px;left:50%;transform:translateX(-50%);
-background:#101c2ddd;padding:12px 18px;border-radius:10px;
-font-size:12px;z-index:5;text-align:center
+button{padding:10px;border:0;border-radius:7px;background:#1479ff;color:white;font-weight:bold;cursor:pointer;margin:4px 2px}
+.red{background:#d93645}.green{background:#159767}.orange{background:#d68b26}.dark{background:#29394b}
+#cross{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none}
+#guide{
+position:fixed;bottom:14px;left:50%;transform:translateX(-50%);
+background:#102033dd;padding:12px 18px;border-radius:10px;
+z-index:5;text-align:center;font-size:12px
 }
 #toast{
 position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
-background:#102638;padding:12px 20px;border-radius:10px;
-display:none;z-index:10
+background:#102638;padding:15px;border-radius:10px;display:none;z-index:10
 }
-@media(max-width:700px){
-#hud{width:270px;padding:12px}
-#mission{display:none}
+#mission{
+position:fixed;right:12px;top:12px;width:270px;
+background:#081320e8;border:1px solid #3b5369;border-radius:12px;
+padding:16px;z-index:5
 }
+#mission h3{color:#40d8ff}
+@media(max-width:700px){#mission{display:none}#hud{width:260px}}
 </style>
 </head>
 <body>
 
 <div id="hud">
-<h1>🚨 SIMUS 3D</h1>
-<div class="sub">SIMULADOR DE RESPUESTA SÍSMICA</div>
+<h1>SIMUS 3.0</h1>
+<div class="small">SIMULADOR URBANO DE RESPUESTA SÍSMICA</div>
 
 <div class="metric">
-<div class="info">ESTADO DEL ESCENARIO</div>
-<div class="status" id="status">ENTORNO NORMAL</div>
+<div class="small">ESCENARIO</div>
+<strong id="status" style="color:#ffd166">ENTORNO NORMAL</strong>
 </div>
 
 <div class="metric">
-<div class="info">DURACIÓN DEL EVENTO</div>
-<div id="timer" style="font-size:25px;font-weight:bold">00:00</div>
+<div class="small">TIEMPO</div>
+<div id="timer" style="font-size:24px">00:00</div>
 </div>
 
 <div class="metric">
-<div class="info">INTENSIDAD SIMULADA</div>
+<div class="small">INTENSIDAD SIMULADA</div>
 <div id="intensity" style="font-size:24px;color:#ff6868">0.0</div>
 </div>
 
-<button class="red" id="earthquake">⚠ INICIAR TERREMOTO</button>
-<button class="green" id="stop">DETENER</button>
-<button class="dark" id="reset">REINICIAR ESCENARIO</button>
-<button class="orange" id="pointer">ACTIVAR CAMINATA</button>
-<div class="info" style="margin-top:10px">
-Explora el entorno y realiza tu recorrido.
+<button class="red" id="quake">⚠ INICIAR TERREMOTO</button>
+<button class="green" id="stop">DETENER SISMO</button>
+<button class="dark" id="reset">REINICIAR</button>
+<button class="orange" id="walk">ACTIVAR CAMINATA</button>
+
+<hr style="border-color:#34495c">
+
+<div class="small">
+<strong>CONTROLES</strong><br>
+W: avanzar<br>
+S: retroceder<br>
+A: izquierda<br>
+D: derecha<br>
+Mouse: mirar<br>
+Shift: velocidad
+</div>
+
+<hr style="border-color:#34495c">
+
+<div class="small">
+<strong>OBJETIVOS</strong><br>
+1. Protegerse.<br>
+2. Evaluar daños.<br>
+3. Identificar riesgos.<br>
+4. Llegar a zona segura.<br>
+5. Reportar.
 </div>
 </div>
 
 <div id="mission">
-<h3>◈ OBJETIVO</h3>
-<div class="info">
-Explora la zona urbana afectada por el terremoto.<br><br>
-Identifica daños, escombros, grietas y zonas de riesgo.<br><br>
-Practica el desplazamiento y la observación del entorno.
+<h3>◈ MISIÓN URBANA</h3>
+<div class="small">
+Recorre la zona urbana afectada.<br><br>
+Dirígete al campus del Instituto Tecnológico de Puebla.<br><br>
+Observa vehículos, viviendas, edificios, personas y zonas de riesgo.<br><br>
+Una vez detenido el movimiento, evalúa el entorno y utiliza rutas seguras.
 </div>
-<hr style="border-color:#304253">
-<div class="info">
-<strong>CONTROLES</strong><br>
-W = Avanzar<br>
-S = Retroceder<br>
-A = Izquierda<br>
-D = Derecha<br>
-Mouse = Mirar<br>
-Shift = Caminar rápido
+<hr style="border-color:#34495c">
+<div class="small">
+<strong>DESTINO:</strong><br>
+Instituto Tecnológico de Puebla<br><br>
+<strong>ESCENARIO:</strong><br>
+Representación virtual educativa.
 </div>
 </div>
 
-<div id="crosshair">+</div>
-<div id="instructions">
-Haz clic en ACTIVAR CAMINATA para controlar la cámara · WASD · Mouse
-</div>
+<div id="cross">+</div>
+<div id="guide">Haz clic en ACTIVAR CAMINATA · WASD · Mouse</div>
 <div id="toast"></div>
 
 <script type="importmap">
 {
 "imports":{
-"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
-"three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js"
 }
 }
 </script>
@@ -123,346 +120,641 @@ Haz clic en ACTIVAR CAMINATA para controlar la cámara · WASD · Mouse
 import * as THREE from 'three';
 
 const scene=new THREE.Scene();
-scene.background=new THREE.Color(0x91c8dc);
-scene.fog=new THREE.Fog(0x91c8dc,35,120);
+scene.background=new THREE.Color(0x9bc5d8);
+scene.fog=new THREE.Fog(0x9bc5d8,90,300);
 
-const camera=new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,.1,200);
-camera.position.set(0,1.8,15);
+const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.1,500);
+camera.position.set(0,1.8,80);
 
 const renderer=new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(window.innerWidth,window.innerHeight);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
 renderer.shadowMap.enabled=true;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 renderer.outputColorSpace=THREE.SRGBColorSpace;
-renderer.xr.enabled=true;
 document.body.appendChild(renderer.domElement);
 
-scene.add(new THREE.HemisphereLight(0xc8ecff,0x47403b,2));
+scene.add(new THREE.HemisphereLight(0xe3f5ff,0x53453a,2.4));
 
-const sunlight=new THREE.DirectionalLight(0xffffff,2.7);
-sunlight.position.set(-20,40,20);
-sunlight.castShadow=true;
-sunlight.shadow.mapSize.set(2048,2048);
-scene.add(sunlight);
+const sun=new THREE.DirectionalLight(0xffffff,3);
+sun.position.set(-50,70,30);
+sun.castShadow=true;
+sun.shadow.mapSize.set(2048,2048);
+scene.add(sun);
 
-// MATERIALS
-const matRoad=new THREE.MeshStandardMaterial({color:0x303237});
-const matSidewalk=new THREE.MeshStandardMaterial({color:0x9c9b99});
-const matConcrete=new THREE.MeshStandardMaterial({color:0x88847e});
-const matWindow=new THREE.MeshStandardMaterial({
-color:0x142a3c,metalness:.15,roughness:.35
-});
-const matCrack=new THREE.MeshBasicMaterial({color:0x171717});
-const matDebris=new THREE.MeshStandardMaterial({color:0x77736e});
-const matGrass=new THREE.MeshStandardMaterial({color:0x394f36});
+const M=(color,roughness=1)=>new THREE.MeshStandardMaterial({color,roughness});
+const roadMat=M(0x30343a);
+const sidewalkMat=M(0xa7a39c);
+const concreteMat=M(0x807e78);
+const windowMat=M(0x18394c,.35);
+const glassMat=M(0x567d91,.3);
+const rubbleMat=M(0x76716b);
+const crackMat=new THREE.LineBasicMaterial({color:0x161616});
+
+const objects=[];
+const colliders=[];
+const quakeObjects=[];
+const people=[];
+const vehicles=[];
 
 // GROUND
 const ground=new THREE.Mesh(
-new THREE.PlaneGeometry(200,200),
-new THREE.MeshStandardMaterial({color:0x85827f})
+new THREE.PlaneGeometry(400,400),M(0x85837e)
 );
 ground.rotation.x=-Math.PI/2;
-ground.position.y=-.12;
+ground.position.y=-.1;
 ground.receiveShadow=true;
 scene.add(ground);
 
-// ROAD
-const road=new THREE.Mesh(new THREE.PlaneGeometry(22,120),matRoad);
-road.rotation.x=-Math.PI/2;
-road.position.y=0;
-road.receiveShadow=true;
-scene.add(road);
+// ROADS
+function road(x,z,w,d){
+const r=new THREE.Mesh(new THREE.PlaneGeometry(w,d),roadMat);
+r.rotation.x=-Math.PI/2;
+r.position.set(x,.01,z);
+r.receiveShadow=true;
+scene.add(r);
+}
+road(0,0,30,300);
+road(0,-35,220,22);
+road(0,35,220,22);
+road(-65,0,22,220);
+road(65,0,22,220);
 
-// ROAD STRIPES
-for(let z=-55;z<55;z+=8){
-const stripe=new THREE.Mesh(
-new THREE.BoxGeometry(.25,.03,3),
-new THREE.MeshStandardMaterial({color:0xffffff})
-);
-stripe.position.set(0,.04,z);
-scene.add(stripe);
+// LANE LINES
+for(let z=-140;z<140;z+=9){
+const dash=new THREE.Mesh(new THREE.BoxGeometry(.3,.04,4),M(0xffffff));
+dash.position.set(0,.05,z);
+scene.add(dash);
+}
+for(let x=-105;x<105;x+=9){
+const dash=new THREE.Mesh(new THREE.BoxGeometry(4,.04,.3),M(0xffffff));
+dash.position.set(x,.05,35);
+scene.add(dash);
 }
 
 // SIDEWALKS
-for(let s of [-1,1]){
-const sidewalk=new THREE.Mesh(
-new THREE.BoxGeometry(5,.35,120),matSidewalk
-);
-sidewalk.position.set(s*13,.12,0);
-sidewalk.receiveShadow=true;
-scene.add(sidewalk);
+function sidewalk(x,z,w,d){
+const s=new THREE.Mesh(new THREE.BoxGeometry(w,.3,d),sidewalkMat);
+s.position.set(x,.15,z);
+s.receiveShadow=true;
+scene.add(s);
 }
-
-// BUILDINGS
-const buildings=[];
-const colliders=[];
-
-function building(x,z,w,h,d,color,damage=false){
-const group=new THREE.Group();
-
-const material=new THREE.MeshStandardMaterial({color,roughness:.95});
-const body=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);
-body.position.y=h/2;
-body.castShadow=true;
-body.receiveShadow=true;
-group.add(body);
-
-// WINDOWS
-const cols=Math.max(2,Math.floor(w/2.5));
-const rows=Math.max(2,Math.floor(h/3.3));
-
-for(let r=0;r<rows;r++){
-for(let c=0;c<cols;c++){
-const win=new THREE.Mesh(
-new THREE.BoxGeometry(1.05,1.35,.12),matWindow
-);
-win.position.set(
--w/2+1.5+c*(w/(cols)),
-2.2+r*3.1,
-d/2+.08
-);
-group.add(win);
-
-const win2=win.clone();
-win2.position.z=-d/2-.08;
-group.add(win2);
-}
-}
-
-// FLOOR EDGES
-for(let y=3;y<h;y+=3.2){
-const edge=new THREE.Mesh(
-new THREE.BoxGeometry(w+.1,.15,d+.1),
-new THREE.MeshStandardMaterial({color:0x5f5c58})
-);
-edge.position.y=y;
-group.add(edge);
-}
-
-// DAMAGE
-if(damage){
-const damagedWall=new THREE.Mesh(
-new THREE.BoxGeometry(w*.35,h*.4,.3),
-new THREE.MeshStandardMaterial({color:0x44423e})
-);
-damagedWall.position.set(w*.2,h*.75,d/2+.2);
-damagedWall.rotation.z=.2;
-group.add(damagedWall);
-}
-
-group.position.set(x,0,z);
-scene.add(group);
-buildings.push(group);
-
-// Collision box
-colliders.push({
-x:x,
-z:z,
-w:w+1,
-d:d+1
-});
-}
-
-building(-19,-12,14,26,12,0xaaa198,true);
-building(-19,-40,14,32,12,0x878782,true);
-building(-18,20,14,22,12,0xb4aea5);
-building(19,-12,14,30,12,0x786d62,true);
-building(19,-40,14,35,12,0x908276,true);
-building(18,20,14,24,12,0x9c958b);
-building(-8,-53,8,15,9,0x8a8c91);
-building(8,-53,8,18,9,0x9b938a);
-building(-8,45,8,18,9,0x928b83);
-building(8,45,8,16,9,0x8d8d92);
+sidewalk(-19,0,5,300);
+sidewalk(19,0,5,300);
+sidewalk(0,-49,220,5);
+sidewalk(0,-21,220,5);
+sidewalk(0,49,220,5);
+sidewalk(0,21,220,5);
+sidewalk(-76,0,5,220);
+sidewalk(-54,0,5,220);
+sidewalk(54,0,5,220);
+sidewalk(76,0,5,220);
 
 // CRACKS
 function crack(points){
 const line=new THREE.Line(
 new THREE.BufferGeometry().setFromPoints(
 points.map(p=>new THREE.Vector3(p[0],.08,p[1]))
-),
-matCrack
+),crackMat
 );
 scene.add(line);
 }
+crack([[-12,85],[-8,80],[-12,75],[-5,70],[0,65]]);
+crack([[10,60],[8,55],[12,50],[7,45],[5,38]]);
+crack([[-12,30],[-8,25],[-10,20],[-5,15],[2,10]]);
+crack([[10,0],[5,-5],[9,-10],[4,-15],[8,-20]]);
+crack([[-10,-30],[-7,-35],[-10,-40],[-4,-45],[2,-50]]);
+crack([[15,-65],[10,-70],[14,-75],[5,-80],[3,-85]]);
+crack([[-5,-100],[0,-105],[-6,-110],[4,-115],[8,-120]]);
+crack([[8,100],[5,105],[10,110],[5,115]]);
 
-crack([[-9,-20],[-7,-17],[-8,-13],[-5,-9],[-2,-4],[1,2]]);
-crack([[5,-38],[2,-34],[4,-30],[1,-26],[4,-21]]);
-crack([[-7,5],[-4,9],[-7,12],[-3,15],[-4,20]]);
-crack([[2,22],[4,25],[1,29],[4,33],[2,38]]);
-crack([[-1,-45],[2,-41],[-2,-36],[3,-31]]);
-crack([[8,-12],[6,-8],[9,-5],[7,0]]);
-crack([[-3,40],[-1,43],[-5,46],[-2,50]]);
+// BUILDINGS
+function building(x,z,w,h,d,color,damage=false){
+const g=new THREE.Group();
+const body=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),M(color));
+body.position.y=h/2;
+body.castShadow=true;
+body.receiveShadow=true;
+g.add(body);
+
+// Windows on front and rear
+const cols=Math.max(2,Math.floor(w/2.5));
+const rows=Math.max(2,Math.floor(h/3));
+
+for(let r=0;r<rows;r++){
+for(let c=0;c<cols;c++){
+const win=new THREE.Mesh(new THREE.BoxGeometry(1.2,1.5,.12),windowMat);
+win.position.set(-w/2+1.4+c*(w/cols),2+r*3.1,d/2+.08);
+g.add(win);
+const rear=win.clone();
+rear.position.z=-d/2-.08;
+g.add(rear);
+}
+}
+
+// Side windows
+for(let r=0;r<rows;r++){
+const sidewin=new THREE.Mesh(new THREE.BoxGeometry(.12,1.5,1.2),windowMat);
+sidewin.position.set(w/2+.08,2+r*3.1,0);
+g.add(sidewin);
+}
+
+// Floors
+for(let y=3;y<h;y+=3.2){
+const floorline=new THREE.Mesh(new THREE.BoxGeometry(w+.2,.13,d+.2),M(0x64615c));
+floorline.position.y=y;
+g.add(floorline);
+}
+
+// Damage facade
+if(damage){
+const hole=new THREE.Mesh(
+new THREE.BoxGeometry(w*.35,h*.3,.3),
+M(0x343434)
+);
+hole.position.set(w*.2,h*.65,d/2+.15);
+g.add(hole);
+
+const rubble=new THREE.Mesh(
+new THREE.BoxGeometry(w*.4,1.5,d*.7),rubbleMat
+);
+rubble.position.set(x+w*.1,1,z+d*.4);
+rubble.rotation.z=.3;
+scene.add(rubble);
+}
+
+g.position.set(x,0,z);
+scene.add(g);
+objects.push(g);
+quakeObjects.push(g);
+colliders.push({x,z,w:w+1,d:d+1});
+}
+
+// Residential and commercial areas
+building(-32,-75,18,26,16,0xb9a58e,true);
+building(-32,-115,18,20,16,0xd2c2ad,false);
+building(-32,-45,18,24,16,0x948d82,true);
+
+building(32,-75,18,27,16,0xa9b0b3,true);
+building(32,-115,18,22,16,0xccc1ae,false);
+building(32,-45,18,24,16,0x867f75,true);
+
+building(-32,75,18,24,16,0xc2b49c,false);
+building(-32,115,18,28,16,0x92877d,true);
+building(32,75,18,24,16,0xbbb1a6,true);
+building(32,115,18,22,16,0x9e9589,false);
+
+// Houses
+function house(x,z,color){
+const g=new THREE.Group();
+const body=new THREE.Mesh(new THREE.BoxGeometry(12,7,10),M(color));
+body.position.y=3.5;
+body.castShadow=true;
+body.receiveShadow=true;
+g.add(body);
+
+const roof=new THREE.Mesh(
+new THREE.ConeGeometry(8,4,4),
+M(0x7c4334)
+);
+roof.position.y=9;
+roof.rotation.y=Math.PI/4;
+g.add(roof);
+
+const door=new THREE.Mesh(new THREE.BoxGeometry(1.6,3,.15),M(0x3b2820));
+door.position.set(0,1.5,5.08);
+g.add(door);
+
+const w1=new THREE.Mesh(new THREE.BoxGeometry(2,2,.15),glassMat);
+w1.position.set(-3,3.5,5.08);
+g.add(w1);
+const w2=w1.clone();
+w2.position.x=3;
+g.add(w2);
+
+g.position.set(x,0,z);
+scene.add(g);
+colliders.push({x,z,w:13,d:11});
+}
+house(-90,-70,0xc8a27e);
+house(-90,-45,0xc1b29b);
+house(-90,-20,0xd0b19a);
+house(-90,20,0xc4c0a8);
+house(-90,45,0x9bafbc);
+house(-90,70,0xb7a58b);
+house(90,-70,0xc8a27e);
+house(90,-45,0xc1b29b);
+house(90,-20,0xd0b19a);
+house(90,20,0xc4c0a8);
+house(90,45,0x9bafbc);
+house(90,70,0xb7a58b);
+
+// UNIVERSITY CAMPUS
+// Campus grounds
+const campusGround=new THREE.Mesh(
+new THREE.BoxGeometry(72,.3,90),M(0x677d55)
+);
+campusGround.position.set(0,.1,-175);
+campusGround.receiveShadow=true;
+scene.add(campusGround);
+
+// Campus pavement
+const campusPath=new THREE.Mesh(
+new THREE.BoxGeometry(32,.12,80),M(0xbbb8b1)
+);
+campusPath.position.set(0,.3,-175);
+scene.add(campusPath);
+
+// University building structure with open entrance
+const university=new THREE.Group();
+
+// Main wings
+const leftWing=new THREE.Mesh(
+new THREE.BoxGeometry(22,14,22),M(0xd8d3c7)
+);
+leftWing.position.set(-16,7,-185);
+leftWing.castShadow=true;
+leftWing.receiveShadow=true;
+university.add(leftWing);
+
+const rightWing=new THREE.Mesh(
+new THREE.BoxGeometry(22,14,22),M(0xd8d3c7)
+);
+rightWing.position.set(16,7,-185);
+rightWing.castShadow=true;
+rightWing.receiveShadow=true;
+university.add(rightWing);
+
+// Back building
+const rear=new THREE.Mesh(
+new THREE.BoxGeometry(54,16,8),M(0xc6c0b6)
+);
+rear.position.set(0,8,-197);
+rear.castShadow=true;
+university.add(rear);
+
+// Entrance pillars
+for(let x of [-6,6]){
+const pillar=new THREE.Mesh(
+new THREE.BoxGeometry(2,14,2),M(0xe7e1d5)
+);
+pillar.position.set(x,7,-173);
+university.add(pillar);
+}
+
+// Entrance roof
+const entranceRoof=new THREE.Mesh(
+new THREE.BoxGeometry(18,2,6),M(0x726a61)
+);
+entranceRoof.position.set(0,14,-173);
+university.add(entranceRoof);
+
+// Entrance interior floor
+const interior=new THREE.Mesh(
+new THREE.BoxGeometry(32,.25,26),M(0xaaa59c)
+);
+interior.position.set(0,.4,-184);
+university.add(interior);
+
+// Interior walls
+const interiorBack=new THREE.Mesh(
+new THREE.BoxGeometry(32,10,1),M(0xd4d1c9)
+);
+interiorBack.position.set(0,5,-195);
+university.add(interiorBack);
+
+const interiorLeft=new THREE.Mesh(
+new THREE.BoxGeometry(1,10,24),M(0xd4d1c9)
+);
+interiorLeft.position.set(-16,5,-184);
+university.add(interiorLeft);
+
+const interiorRight=interiorLeft.clone();
+interiorRight.position.x=16;
+university.add(interiorRight);
+
+// Windows on campus
+for(let x=-25;x<=25;x+=5){
+const win=new THREE.Mesh(
+new THREE.BoxGeometry(2.5,3,.2),glassMat
+);
+win.position.set(x,5,-169);
+university.add(win);
+}
+
+// UNIVERSITY SIGN
+function sign(text){
+const canvas=document.createElement('canvas');
+canvas.width=1024;canvas.height=256;
+const ctx=canvas.getContext('2d');
+ctx.fillStyle='#173d62';
+ctx.fillRect(0,0,1024,256);
+ctx.fillStyle='#ffffff';
+ctx.font='bold 48px Arial';
+ctx.textAlign='center';
+ctx.fillText(text,512,100);
+ctx.font='bold 65px Arial';
+ctx.fillText('INSTITUTO TECNOLÓGICO',512,180);
+const tex=new THREE.CanvasTexture(canvas);
+const signmesh=new THREE.Mesh(
+new THREE.PlaneGeometry(22,5),
+new THREE.MeshBasicMaterial({map:tex})
+);
+signmesh.position.set(0,17,-173);
+scene.add(signmesh);
+}
+sign('CAMPUS');
+
+// Campus entrance navigation marker
+const marker=new THREE.Mesh(
+new THREE.TorusGeometry(3,.2,8,32),
+new THREE.MeshBasicMaterial({color:0x00ff99})
+);
+marker.rotation.x=Math.PI/2;
+marker.position.set(0,.5,-165);
+scene.add(marker);
+
+// INTERIOR CLASSROOM objects
+function desk(x,z){
+const top=new THREE.Mesh(
+new THREE.BoxGeometry(2, .15,1.3),M(0x8c6748)
+);
+top.position.set(x,1.1,z);
+scene.add(top);
+const legs=[];
+for(let dx of [-.8,.8]){
+for(let dz of [-.4,.4]){
+const leg=new THREE.Mesh(
+new THREE.BoxGeometry(.1,1,.1),M(0x454545)
+);
+leg.position.set(x+dx,.55,z+dz);
+scene.add(leg);
+}
+}
+}
+for(let z=-187;z>-193;z-=2.5){
+desk(-8,z);
+desk(8,z);
+}
+
+// COLLISION UNIVERSITY (partial; doorway remains open)
+colliders.push({x:-16,z:-185,w:23,d:23});
+colliders.push({x:16,z:-185,w:23,d:23});
+colliders.push({x:0,z:-197,w:55,d:9});
 
 // DEBRIS
-function rubble(x,z,s){
+function debris(x,z,s){
 const mesh=new THREE.Mesh(
-new THREE.DodecahedronGeometry(s,0),
-matDebris
+new THREE.DodecahedronGeometry(s,0),rubbleMat
 );
-mesh.position.set(x,s*.45,z);
-mesh.rotation.set(Math.random()*3,Math.random()*3,Math.random()*3);
+mesh.position.set(x,s*.6,z);
+mesh.rotation.set(Math.random()*2,Math.random()*2,Math.random()*2);
 mesh.castShadow=true;
 mesh.receiveShadow=true;
 scene.add(mesh);
 }
-
-for(let i=0;i<100;i++){
-const x=(Math.random()*30)-15;
-const z=(Math.random()*110)-55;
-if(Math.abs(x)>6){
-rubble(x,z,.4+Math.random()*1.5);
-}
-}
-
-// BROKEN BLOCKS
-for(let i=0;i<24;i++){
-const x=(Math.random()*8)+7;
-const z=(Math.random()*30)-20;
-const block=new THREE.Mesh(
-new THREE.BoxGeometry(
-1+Math.random()*2,
-.4+Math.random()*1.2,
-1+Math.random()*2
-),
-matConcrete
-);
-block.position.set(x,Math.random()*.5,z);
-block.rotation.set(Math.random(),Math.random(),Math.random());
-block.castShadow=true;
-block.receiveShadow=true;
-scene.add(block);
+for(let i=0;i<130;i++){
+let x=(Math.random()*40)-20;
+let z=(Math.random()*260)-130;
+if(Math.abs(x)>12)debris(x,z,.3+Math.random()*1.8);
 }
 
 // TREES
 function tree(x,z){
 const trunk=new THREE.Mesh(
-new THREE.CylinderGeometry(.35,.5,3.5,8),
-new THREE.MeshStandardMaterial({color:0x66452a})
+new THREE.CylinderGeometry(.3,.5,3.5,8),M(0x63432c)
 );
 trunk.position.set(x,1.75,z);
-trunk.castShadow=true;
 scene.add(trunk);
-
 const foliage=new THREE.Mesh(
-new THREE.SphereGeometry(2.5,16,12),
-new THREE.MeshStandardMaterial({color:0x236333})
+new THREE.SphereGeometry(2.5,16,12),M(0x315e35)
 );
 foliage.position.set(x,4.5,z);
-foliage.castShadow=true;
 scene.add(foliage);
 }
-tree(-12,-6);
-tree(12,9);
-tree(-12,30);
-tree(12,-30);
-tree(-12,45);
+for(let z=-110;z<110;z+=20){
+tree(-24,z);
+tree(24,z);
+}
+for(let z=-210;z<-140;z+=15){
+tree(-30,z);
+tree(30,z);
+}
 
 // STREET LIGHTS
 function streetLight(x,z){
 const pole=new THREE.Mesh(
-new THREE.CylinderGeometry(.1,.14,7,8),
-new THREE.MeshStandardMaterial({color:0x323a40})
+new THREE.CylinderGeometry(.1,.15,8,8),M(0x3b3b3b)
 );
-pole.position.set(x,3.5,z);
+pole.position.set(x,4,z);
 scene.add(pole);
-
 const arm=new THREE.Mesh(
-new THREE.BoxGeometry(2,.12,.12),
-new THREE.MeshStandardMaterial({color:0x323a40})
+new THREE.BoxGeometry(2,.15,.15),M(0x3b3b3b)
 );
-arm.position.set(x+1,6.8,z);
+arm.position.set(x+1,7,z);
 scene.add(arm);
-
-const lamp=new THREE.Mesh(
-new THREE.BoxGeometry(.6,.3,.4),
-new THREE.MeshStandardMaterial({color:0xffddaa,emissive:0x443322})
-);
-lamp.position.set(x+1.4,6.6,z);
-scene.add(lamp);
 }
-streetLight(-12,-20);
-streetLight(12,20);
-
-// SAFE AREA
-const safeZone=new THREE.Mesh(
-new THREE.CircleGeometry(4,32),
-new THREE.MeshBasicMaterial({color:0x00ff99,transparent:true,opacity:.25})
-);
-safeZone.rotation.x=-Math.PI/2;
-safeZone.position.set(0,.1,-48);
-scene.add(safeZone);
-
-const safeRing=new THREE.Mesh(
-new THREE.TorusGeometry(4,.18,8,32),
-new THREE.MeshBasicMaterial({color:0x00ff99})
-);
-safeRing.rotation.x=Math.PI/2;
-safeRing.position.set(0,.15,-48);
-scene.add(safeRing);
-
-// HAZARDS
-const hazardObjects=[];
-function hazard(x,z){
-const h=new THREE.Group();
-const ring=new THREE.Mesh(
-new THREE.TorusGeometry(1.3,.12,8,24),
-new THREE.MeshBasicMaterial({color:0xff3030})
-);
-ring.rotation.x=Math.PI/2;
-ring.position.y=.1;
-h.add(ring);
-
-const cone=new THREE.Mesh(
-new THREE.ConeGeometry(.5,1,8),
-new THREE.MeshStandardMaterial({color:0xff3b3b,emissive:0x551111})
-);
-cone.position.y=1;
-h.add(cone);
-h.position.set(x,0,z);
-scene.add(h);
-hazardObjects.push(h);
+for(let z=-110;z<110;z+=30){
+streetLight(-24,z);
+streetLight(24,z);
 }
-hazard(-7,-15);
-hazard(7,-25);
-hazard(-8,12);
 
-// PLAYER CONTROLS
-let yaw=0;
-let pitch=0;
+// VEHICLES
+function car(x,z,color,rotation=0){
+const g=new THREE.Group();
+const base=new THREE.Mesh(
+new THREE.BoxGeometry(4,1.2,7),M(color)
+);
+base.position.y=.8;
+base.castShadow=true;
+g.add(base);
+
+const cabin=new THREE.Mesh(
+new THREE.BoxGeometry(3,1.5,3.5),glassMat
+);
+cabin.position.set(0,1.8,-.3);
+g.add(cabin);
+
+for(let wx of [-1.7,1.7]){
+for(let wz of [-2.3,2.3]){
+const wheel=new THREE.Mesh(
+new THREE.CylinderGeometry(.65,.65,.45,16),M(0x181818)
+);
+wheel.rotation.z=Math.PI/2;
+wheel.position.set(wx,.6,wz);
+g.add(wheel);
+}
+}
+
+g.position.set(x,0,z);
+g.rotation.y=rotation;
+scene.add(g);
+vehicles.push(g);
+return g;
+}
+
+car(-7,-35,0x2869ab);
+car(7,10,0xc93d38);
+car(-7,70,0x777777);
+car(7,-85,0xd8b33d);
+car(-7,110,0x335544);
+car(7,120,0xffffff);
+car(-7,-110,0x333333);
+
+// AMBULANCE
+function ambulance(x,z){
+const g=new THREE.Group();
+const body=new THREE.Mesh(
+new THREE.BoxGeometry(5,2.5,9),M(0xffffff)
+);
+body.position.y=1.5;
+body.castShadow=true;
+g.add(body);
+
+const cabin=new THREE.Mesh(
+new THREE.BoxGeometry(4,2,3),glassMat
+);
+cabin.position.set(0,2.6,2.4);
+g.add(cabin);
+
+const stripe=new THREE.Mesh(
+new THREE.BoxGeometry(5,.5,9),M(0xd82e35)
+);
+stripe.position.y=1.7;
+g.add(stripe);
+
+const light=new THREE.Mesh(
+new THREE.BoxGeometry(2,.4,.5),
+new THREE.MeshStandardMaterial({color:0xff0000,emissive:0xff0000})
+);
+light.position.y=3.5;
+g.add(light);
+
+for(let wx of [-2.2,2.2]){
+for(let wz of [-2.8,2.8]){
+const wheel=new THREE.Mesh(
+new THREE.CylinderGeometry(.7,.7,.4,16),M(0x111111)
+);
+wheel.rotation.z=Math.PI/2;
+wheel.position.set(wx,.6,wz);
+g.add(wheel);
+}
+}
+g.position.set(x,0,z);
+scene.add(g);
+vehicles.push(g);
+return g;
+}
+ambulance(-7,-170);
+ambulance(7,-170);
+
+// RESCUE VEHICLE
+function rescue(x,z){
+const g=new THREE.Group();
+const base=new THREE.Mesh(
+new THREE.BoxGeometry(5,2.5,9),M(0x223344)
+);
+base.position.y=1.5;
+g.add(base);
+const cab=new THREE.Mesh(
+new THREE.BoxGeometry(4,2,3),glassMat
+);
+cab.position.set(0,2.5,3);
+g.add(cab);
+const beacon=new THREE.Mesh(
+new THREE.BoxGeometry(2,.4,.5),
+new THREE.MeshStandardMaterial({color:0xffaa00,emissive:0xff6600})
+);
+beacon.position.y=3.3;
+g.add(beacon);
+g.position.set(x,0,z);
+scene.add(g);
+vehicles.push(g);
+}
+rescue(7,-155);
+
+// PEOPLE
+function person(x,z,shirt=0x2255aa){
+const g=new THREE.Group();
+const torso=new THREE.Mesh(
+new THREE.CylinderGeometry(.45,.55,1.5,8),M(shirt)
+);
+torso.position.y=1.5;
+g.add(torso);
+
+const head=new THREE.Mesh(
+new THREE.SphereGeometry(.4,16,12),M(0xd6a77a)
+);
+head.position.y=2.5;
+g.add(head);
+
+for(let side of [-.3,.3]){
+const leg=new THREE.Mesh(
+new THREE.BoxGeometry(.25,1,.25),M(0x303030)
+);
+leg.position.set(side,.5,0);
+g.add(leg);
+}
+g.position.set(x,0,z);
+scene.add(g);
+people.push(g);
+return g;
+}
+
+// Citizens in environment
+person(-12,45,0x2266aa);
+person(10,35,0x884455);
+person(-10,-10,0x446622);
+person(12,-55,0x334499);
+person(-12,-90,0xaa6633);
+person(10,-115,0x663366);
+person(-10,-145,0x228888);
+person(12,-180,0x555555);
+person(-12,110,0x773333);
+person(10,100,0x336666);
+
+// Fallen / damaged debris around roads
+for(let i=0;i<30;i++){
+const x=(Math.random()*25)-12.5;
+const z=(Math.random()*220)-110;
+const block=new THREE.Mesh(
+new THREE.BoxGeometry(
+1+Math.random()*2,
+.4+Math.random()*1.2,
+1+Math.random()*2
+),concreteMat
+);
+block.position.set(x,Math.random()*.5,z);
+block.rotation.set(Math.random(),Math.random(),Math.random());
+scene.add(block);
+}
+
+// PLAYER
+let yaw=0,pitch=0;
 const keys={};
-
-window.addEventListener('keydown',e=>{
-keys[e.key.toLowerCase()]=true;
-});
-window.addEventListener('keyup',e=>{
-keys[e.key.toLowerCase()]=false;
-});
+window.addEventListener('keydown',e=>keys[e.key.toLowerCase()]=true);
+window.addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
 
 let pointerLocked=false;
-
 renderer.domElement.addEventListener('click',()=>{
 renderer.domElement.requestPointerLock?.();
 });
-
 document.addEventListener('pointerlockchange',()=>{
 pointerLocked=document.pointerLockElement===renderer.domElement;
-document.getElementById('pointer').textContent=
+document.getElementById('walk').textContent=
 pointerLocked?'CAMINATA ACTIVADA':'ACTIVAR CAMINATA';
 });
-
 document.addEventListener('mousemove',e=>{
 if(!pointerLocked)return;
 yaw-=e.movementX*.0025;
 pitch-=e.movementY*.0025;
 pitch=Math.max(-1.45,Math.min(1.45,pitch));
 });
-
-document.getElementById('pointer').onclick=()=>{
+document.getElementById('walk').onclick=()=>{
 renderer.domElement.requestPointerLock?.();
 };
 
-// MOVEMENT COLLISION
+// COLLISION
 function collides(pos){
 for(const c of colliders){
 if(pos.x>c.x-c.w/2&&pos.x<c.x+c.w/2&&
@@ -473,31 +765,30 @@ return true;
 return false;
 }
 
-// Earthquake
+// QUAKE
 let earthquake=false;
 let quakeTime=0;
 let elapsed=0;
-let quakeDuration=20;
-let originalPosition=new THREE.Vector3();
+const duration=20;
 
 const status=document.getElementById('status');
 const intensity=document.getElementById('intensity');
 const timer=document.getElementById('timer');
 const toast=document.getElementById('toast');
 
-function message(txt){
-toast.textContent=txt;
+function msg(t){
+toast.textContent=t;
 toast.style.display='block';
-setTimeout(()=>toast.style.display='none',3000);
+setTimeout(()=>toast.style.display='none',3500);
 }
 
-document.getElementById('earthquake').onclick=()=>{
+document.getElementById('quake').onclick=()=>{
 earthquake=true;
 quakeTime=0;
 elapsed=0;
 status.textContent='SISMO ACTIVO';
 status.style.color='#ff5252';
-message('¡TERREMOTO! Agáchate, cúbrete y sujétate.');
+msg('¡TERREMOTO! Agáchate, cúbrete y sujétate.');
 };
 
 document.getElementById('stop').onclick=()=>{
@@ -505,65 +796,61 @@ earthquake=false;
 status.textContent='MOVIMIENTO DETENIDO';
 status.style.color='#55dfad';
 intensity.textContent='0.0';
-message('Movimiento detenido. Evalúa el entorno.');
+msg('Evalúa el entorno. Evita zonas dañadas.');
 };
 
 document.getElementById('reset').onclick=()=>{
 earthquake=false;
 quakeTime=0;
 elapsed=0;
-camera.position.set(0,1.8,15);
+camera.position.set(0,1.8,80);
 yaw=0;
 pitch=0;
 status.textContent='ENTORNO NORMAL';
 status.style.color='#ffd166';
 intensity.textContent='0.0';
 timer.textContent='00:00';
-message('Escenario reiniciado.');
+msg('Escenario reiniciado.');
 };
 
-// Animation
+// ANIMATION
 const clock=new THREE.Clock();
-const camOffset=new THREE.Vector3();
-const movement=new THREE.Vector3();
 const direction=new THREE.Vector3();
-const right=new THREE.Vector3();
+const side=new THREE.Vector3();
+const move=new THREE.Vector3();
 
 renderer.setAnimationLoop(()=>{
 const dt=Math.min(clock.getDelta(),.05);
 const t=clock.elapsedTime;
 
-// MOVEMENT
-if(!earthquake&&!renderer.xr.isPresenting){
-const speed=keys['shift']?10:5.5;
+// Movement
+if(!earthquake){
+const speed=keys['shift']?11:6;
 
 direction.set(-Math.sin(yaw),0,-Math.cos(yaw));
-right.set(Math.cos(yaw),0,-Math.sin(yaw));
+side.set(Math.cos(yaw),0,-Math.sin(yaw));
+move.set(0,0,0);
 
-movement.set(0,0,0);
+if(keys['w']||keys['arrowup'])move.add(direction);
+if(keys['s']||keys['arrowdown'])move.sub(direction);
+if(keys['d']||keys['arrowright'])move.add(side);
+if(keys['a']||keys['arrowleft'])move.sub(side);
 
-if(keys['w']||keys['arrowup'])movement.add(direction);
-if(keys['s']||keys['arrowdown'])movement.sub(direction);
-if(keys['d']||keys['arrowright'])movement.add(right);
-if(keys['a']||keys['arrowleft'])movement.sub(right);
+if(move.length()>0){
+move.normalize().multiplyScalar(speed*dt);
+const candidate=camera.position.clone().add(move);
 
-if(movement.length()>0){
-movement.normalize().multiplyScalar(speed*dt);
-
-const newPos=camera.position.clone();
-newPos.add(movement);
-
-if(!collides(newPos)){
-camera.position.x=newPos.x;
-camera.position.z=newPos.z;
+if(!collides(candidate)){
+camera.position.x=candidate.x;
+camera.position.z=candidate.z;
 }else{
-const posX=camera.position.clone();
-posX.x+=movement.x;
-if(!collides(posX))camera.position.x=posX.x;
+const px=camera.position.clone();
+px.x+=move.x;
+if(!collides(px))camera.position.x=px.x;
 
-const posZ=camera.position.clone();
-posZ.z+=movement.z;
-if(!collides(posZ))camera.position.z=posZ.z;
+const pz=camera.position.clone();
+pz.z+=move.z;
+if(!collides(pz))camera.position.z=pz.z;
 }
 }
 
@@ -572,51 +859,46 @@ camera.rotation.y=yaw;
 camera.rotation.x=pitch;
 }
 
-// EARTHQUAKE
+// Earthquake
 if(earthquake){
 quakeTime+=dt;
 elapsed+=dt;
-const factor=Math.max(0,1-quakeTime/quakeDuration);
-const shake= factor*.28;
+const factor=Math.max(0,1-quakeTime/duration);
+const shake=factor*.25;
 
-camera.position.x+= (Math.random()-.5)*shake;
+camera.position.x+=(Math.random()-.5)*shake;
 camera.position.y=1.8+(Math.random()-.5)*shake;
 camera.rotation.z=(Math.random()-.5)*shake;
 
-for(const b of buildings){
-b.rotation.z=Math.sin(t*20)*shake*.04;
-}
-if(quakeTime>=quakeDuration){
+objects.forEach(b=>{
+b.rotation.z=Math.sin(t*18)*shake*.025;
+});
+
+if(quakeTime>=duration){
 earthquake=false;
 status.textContent='MOVIMIENTO DETENIDO';
 status.style.color='#55dfad';
-message('Sismo terminado. Evalúa riesgos.');
+msg('Sismo terminado. Evalúa daños.');
 }
 }
 
-// METRICS
+// Clock
 intensity.textContent=earthquake?
-(7.5*Math.max(0,1-quakeTime/quakeDuration)).toFixed(1):'0.0';
+(7.5*Math.max(0,1-quakeTime/duration)).toFixed(1):'0.0';
 
 timer.textContent=
 String(Math.floor(elapsed/60)).padStart(2,'0')+':'+
 String(Math.floor(elapsed%60)).padStart(2,'0');
 
-// ANIMATION
-safeRing.rotation.z=Math.sin(t)*.1;
-
-hazardObjects.forEach((h,i)=>{
-h.rotation.y=Math.sin(t*2+i)*.2;
-});
+marker.rotation.z=Math.sin(t)*.1;
 
 renderer.render(scene,camera);
 });
 
-// RESIZE
 window.addEventListener('resize',()=>{
-camera.aspect=window.innerWidth/window.innerHeight;
+camera.aspect=innerWidth/innerHeight;
 camera.updateProjectionMatrix();
-renderer.setSize(window.innerWidth,window.innerHeight);
+renderer.setSize(innerWidth,innerHeight);
 });
 
 </script>
