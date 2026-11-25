@@ -3,773 +3,622 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SIMUS | Simulador Sísmico</title>
-
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SIMUS | Experiencia Sísmica 3D</title>
 <style>
 *{box-sizing:border-box}
-body{
-margin:0;overflow:hidden;background:#07111b;color:#fff;
-font-family:Arial,Helvetica,sans-serif;
-}
-#scene{position:fixed;inset:0;z-index:0}
+body{margin:0;overflow:hidden;background:#111;color:white;font-family:Arial}
 canvas{display:block}
-.topbar{
-position:absolute;top:0;left:0;right:0;height:68px;
-background:rgba(5,13,22,.92);border-bottom:1px solid #26394b;
-display:flex;align-items:center;justify-content:space-between;
-padding:0 24px;z-index:10;
+#hud{
+position:fixed;top:15px;left:15px;width:330px;
+padding:18px;background:rgba(8,15,24,.94);
+border:1px solid #43566a;border-radius:14px;
+z-index:5;box-shadow:0 10px 40px #0008
 }
-.brand{display:flex;align-items:center;gap:12px}
-.logo{
-width:42px;height:42px;border-radius:12px;
-background:linear-gradient(135deg,#00d4ff,#1465ff);
-display:flex;align-items:center;justify-content:center;
-font-size:22px;font-weight:bold;
-}
-.brandname{font-size:22px;font-weight:900;letter-spacing:1px}
-.branddesc{font-size:11px;color:#8da8bf;margin-top:3px}
-.topstatus{display:flex;gap:10px;align-items:center}
-.pill{
-padding:8px 13px;border-radius:20px;background:#142434;
-border:1px solid #324a60;font-size:12px;color:#d6e8f5;
-}
-.live{color:#ff6565}
-#layout{
-position:absolute;top:82px;left:18px;right:18px;bottom:18px;
-display:grid;grid-template-columns:300px 1fr 300px;
-gap:14px;z-index:5;pointer-events:none;
-}
-.panel{
-background:rgba(7,17,29,.92);
-border:1px solid rgba(107,149,182,.3);
-border-radius:16px;padding:17px;
-box-shadow:0 10px 35px rgba(0,0,0,.25);
-pointer-events:auto;backdrop-filter:blur(10px);
-overflow:auto;
-}
-.panel h3{
-margin:0 0 13px;font-size:15px;
-letter-spacing:.5px;color:#e8f6ff;
-}
-.panel h4{font-size:12px;color:#80b9e0;margin:18px 0 8px}
-.small{font-size:11px;color:#9cb2c4;line-height:1.5}
-.metric{
-background:#101e2b;border:1px solid #263d50;
-border-radius:10px;padding:12px;margin:8px 0;
-}
-.metric-label{font-size:10px;color:#93afc5;text-transform:uppercase}
-.metric-value{font-size:23px;font-weight:bold;margin-top:6px}
-.blue{color:#38bdf8}
-.orange{color:#ffb347}
-.red{color:#ff6565}
-.green{color:#55dfad}
-.progress{
-height:7px;background:#203344;border-radius:10px;overflow:hidden;margin-top:8px;
-}
-.progressbar{height:100%;width:0;background:#19c5ff;transition:width .4s}
+h1{font-size:22px;margin:0 0 5px;color:#55d7ff}
+.sub{font-size:12px;color:#a5b7c8;margin-bottom:15px}
+.status{color:#ffd166;font-weight:bold;margin:12px 0}
 button{
-border:0;border-radius:9px;padding:11px 12px;
-font-weight:bold;cursor:pointer;color:white;
-background:#1769ff;transition:.2s;font-size:12px;
+padding:11px;border:0;border-radius:7px;color:white;
+font-weight:bold;cursor:pointer;background:#1479ff;
+margin:4px 2px
 }
-button:hover{filter:brightness(1.2);transform:translateY(-1px)}
-button:disabled{opacity:.5;cursor:not-allowed}
-.btn-red{background:#d83b48}
-.btn-green{background:#10a67a}
-.btn-orange{background:#dc8b22}
-.btn-dark{background:#26394b;border:1px solid #40566a}
-.btn-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
-.btn-row button{flex:1}
-.task{
-padding:10px;background:#112233;border-radius:9px;
-border:1px solid #263e52;margin:8px 0;font-size:12px;
-line-height:1.5;
+.red{background:#d93645}
+.green{background:#159767}
+.orange{background:#d68b26}
+.dark{background:#29394b}
+.info{font-size:12px;color:#d0dfed;line-height:1.6}
+.metric{background:#172534;padding:10px;border-radius:8px;margin:8px 0}
+#mission{
+position:fixed;top:15px;right:15px;width:280px;
+background:rgba(8,15,24,.92);border:1px solid #43566a;
+border-radius:12px;padding:15px;z-index:5
 }
-.task.done{border-color:#10a67a;color:#71e2ba}
-.task strong{display:block;margin-bottom:4px}
-#alert{
-display:none;background:#4a1720;border:1px solid #ff5d68;
-color:#ffd4d7;padding:11px;border-radius:10px;
-margin-bottom:12px;font-size:12px;line-height:1.5;
-}
-#missionText{font-size:12px;line-height:1.6;color:#d6e8f5}
-#score{font-size:30px;color:#59e4b5;font-weight:bold}
-#eventlog{
-font-size:11px;line-height:1.6;color:#a6bfd2;
-max-height:160px;overflow:auto;
-}
-.logitem{border-bottom:1px solid #203344;padding:5px 0}
+#mission h3{color:#55d7ff;margin-top:0}
 #crosshair{
-position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-color:#fff;font-size:22px;z-index:2;pointer-events:none;opacity:.5;
+position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
+color:white;font-size:26px;pointer-events:none
 }
-#bottom{
-position:absolute;bottom:25px;left:50%;transform:translateX(-50%);
-z-index:10;display:flex;gap:8px;pointer-events:auto;
+#instructions{
+position:fixed;bottom:15px;left:50%;transform:translateX(-50%);
+background:#101c2ddd;padding:12px 18px;border-radius:10px;
+font-size:12px;z-index:5;text-align:center
 }
-#hint{
-position:absolute;top:75px;left:50%;transform:translateX(-50%);
-z-index:10;background:rgba(0,0,0,.55);border-radius:20px;
-padding:8px 14px;font-size:11px;color:#d4e7f6;
+#toast{
+position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
+background:#102638;padding:12px 20px;border-radius:10px;
+display:none;z-index:10
 }
-@media(max-width:950px){
-#layout{grid-template-columns:1fr 1fr;top:80px}
-#layout .panel:last-child{display:none}
-}
-@media(max-width:650px){
-.topbar{padding:0 10px}
-.brandname{font-size:16px}
-.topstatus .pill:nth-child(2){display:none}
-#layout{grid-template-columns:1fr;left:8px;right:8px}
-#layout .panel:first-child{max-height:45vh}
-#layout .panel:nth-child(2){display:none}
+@media(max-width:700px){
+#hud{width:270px;padding:12px}
+#mission{display:none}
 }
 </style>
 </head>
-
 <body>
-<div id="scene"></div>
 
-<div class="topbar">
-  <div class="brand">
-    <div class="logo">S</div>
-    <div>
-      <div class="brandname">SIMUS</div>
-      <div class="branddesc">SIMULADOR INMERSIVO DE RESPUESTA SÍSMICA</div>
-    </div>
-  </div>
-  <div class="topstatus">
-    <div class="pill">ENTRENAMIENTO</div>
-    <div class="pill live" id="topState">● SISTEMA EN ESPERA</div>
-    <div class="pill" id="clock">00:00</div>
-  </div>
+<div id="hud">
+<h1>🚨 SIMUS 3D</h1>
+<div class="sub">SIMULADOR DE RESPUESTA SÍSMICA</div>
+
+<div class="metric">
+<div class="info">ESTADO DEL ESCENARIO</div>
+<div class="status" id="status">ENTORNO NORMAL</div>
 </div>
 
-<div id="hint">Explora el escenario · WASD para desplazarte · Mouse para mirar</div>
+<div class="metric">
+<div class="info">DURACIÓN DEL EVENTO</div>
+<div id="timer" style="font-size:25px;font-weight:bold">00:00</div>
+</div>
+
+<div class="metric">
+<div class="info">INTENSIDAD SIMULADA</div>
+<div id="intensity" style="font-size:24px;color:#ff6868">0.0</div>
+</div>
+
+<button class="red" id="earthquake">⚠ INICIAR TERREMOTO</button>
+<button class="green" id="stop">DETENER</button>
+<button class="dark" id="reset">REINICIAR ESCENARIO</button>
+<button class="orange" id="pointer">ACTIVAR CAMINATA</button>
+<div class="info" style="margin-top:10px">
+Explora el entorno y realiza tu recorrido.
+</div>
+</div>
+
+<div id="mission">
+<h3>◈ OBJETIVO</h3>
+<div class="info">
+Explora la zona urbana afectada por el terremoto.<br><br>
+Identifica daños, escombros, grietas y zonas de riesgo.<br><br>
+Practica el desplazamiento y la observación del entorno.
+</div>
+<hr style="border-color:#304253">
+<div class="info">
+<strong>CONTROLES</strong><br>
+W = Avanzar<br>
+S = Retroceder<br>
+A = Izquierda<br>
+D = Derecha<br>
+Mouse = Mirar<br>
+Shift = Caminar rápido
+</div>
+</div>
+
 <div id="crosshair">+</div>
-
-<div id="layout">
-
-<!-- PANEL IZQUIERDO -->
-<div class="panel">
-<h3>◈ CENTRO DE OPERACIONES</h3>
-
-<div id="alert">
-<strong>⚠ ALERTA SÍSMICA</strong><br>
-Mantén la calma. Protégete. No corras.
+<div id="instructions">
+Haz clic en ACTIVAR CAMINATA para controlar la cámara · WASD · Mouse
 </div>
-
-<div class="metric">
-<div class="metric-label">Estado de simulación</div>
-<div class="metric-value orange" id="state">PREPARADO</div>
-</div>
-
-<div class="metric">
-<div class="metric-label">Tiempo de ejercicio</div>
-<div class="metric-value blue" id="timer">00:00</div>
-</div>
-
-<div class="metric">
-<div class="metric-label">Intensidad simulada</div>
-<div class="metric-value red" id="intensity">0.0</div>
-<div class="progress"><div class="progressbar" id="intbar"></div></div>
-</div>
-
-<h4>CONTROL DEL SIMULADOR</h4>
-<div class="btn-row">
-<button class="btn-red" id="start">INICIAR SISMO</button>
-<button class="btn-dark" id="pause">PAUSAR</button>
-</div>
-<div class="btn-row">
-<button class="btn-green" id="reset">REINICIAR</button>
-<button class="btn-orange" id="vr">ENTRAR VR</button>
-</div>
-
-<h4>PROTOCOLO DE SEGURIDAD</h4>
-<div class="task" id="task1">
-<strong>01 · PROTEGERSE</strong>
-Agáchate, cúbrete y sujétate. Protege cabeza y cuello.
-</div>
-<div class="task" id="task2">
-<strong>02 · EVALUAR</strong>
-Identifica peligros sin exponerte a riesgos.
-</div>
-<div class="task" id="task3">
-<strong>03 · EVACUAR</strong>
-Evacúa cuando sea seguro y siguiendo rutas autorizadas.
-</div>
-<div class="task" id="task4">
-<strong>04 · REPORTAR</strong>
-Comunica daños y riesgos al responsable.
-</div>
-
-<p class="small">Este escenario es una experiencia educativa. No representa un análisis estructural real.</p>
-</div>
-
-<!-- PANEL CENTRAL -->
-<div class="panel">
-<h3>◈ MISIÓN DE ENTRENAMIENTO</h3>
-
-<div class="metric">
-<div class="metric-label">Escenario activo</div>
-<div class="metric-value blue">ZONA URBANA</div>
-</div>
-
-<div id="missionText">
-<strong>Objetivo:</strong> completar una respuesta inicial ante un terremoto simulado.<br><br>
-Durante el evento, practica la protección personal. Después del movimiento, identifica peligros y sigue una ruta segura.<br><br>
-<strong>Regla:</strong> nunca ingreses a estructuras dañadas sin evaluación especializada.
-</div>
-
-<h4>OBJETIVOS DEL PARTICIPANTE</h4>
-<div class="task" id="objective1">● Protegerse durante el movimiento</div>
-<div class="task" id="objective2">● Reconocer peligros visibles</div>
-<div class="task" id="objective3">● Dirigirse a una zona segura</div>
-<div class="task" id="objective4">● Completar la evaluación</div>
-
-<h4>RESULTADO</h4>
-<div id="score">0 / 100</div>
-<div class="small" id="resultText">Inicia el escenario para comenzar la evaluación.</div>
-
-<div class="btn-row">
-<button class="btn-green" id="protect">✓ PROTEGERME</button>
-<button class="btn-orange" id="assess">⌕ EVALUAR RIESGOS</button>
-</div>
-<div class="btn-row">
-<button class="btn-dark" id="evacuate">➜ ZONA SEGURA</button>
-<button class="btn-dark" id="report">▤ REPORTAR</button>
-</div>
-</div>
-
-<!-- PANEL DERECHO -->
-<div class="panel">
-<h3>◈ MONITOREO</h3>
-
-<div class="metric">
-<div class="metric-label">Condición del entorno</div>
-<div class="metric-value orange" id="environment">NORMAL</div>
-</div>
-
-<div class="metric">
-<div class="metric-label">Peligros identificados</div>
-<div class="metric-value red" id="hazards">0</div>
-</div>
-
-<div class="metric">
-<div class="metric-label">Puntaje del brigadista</div>
-<div class="metric-value green" id="scoreSide">0</div>
-</div>
-
-<h4>ALERTAS DE ENTORNO</h4>
-<div class="task">⚠ Escombros en vialidad</div>
-<div class="task">⚠ Fachadas con daños simulados</div>
-<div class="task">⚠ Riesgo de caída de objetos</div>
-<div class="task">⚠ Evita zonas estructuralmente dañadas</div>
-
-<h4>BITÁCORA DE EVENTOS</h4>
-<div id="eventlog">
-<div class="logitem">Sistema inicializado.</div>
-<div class="logitem">Escenario listo para iniciar.</div>
-</div>
-
-<h4>CONTROLES</h4>
-<div class="small">
-W / S: avanzar o retroceder<br>
-A / D: desplazamiento lateral<br>
-Mouse: orientación de cámara<br>
-Botón iniciar: activar evento sísmico<br>
-</div>
-
-</div>
-</div>
-
-<div id="bottom">
-<button class="btn-dark" id="home">REPOSICIONAR</button>
-</div>
+<div id="toast"></div>
 
 <script type="importmap">
 {
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
-  }
+"imports":{
+"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+"three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+}
 }
 </script>
 
 <script type="module">
 import * as THREE from 'three';
-import { VRButton } from 'three/addons/webxr/VRButton.js';
 
 const scene=new THREE.Scene();
-scene.background=new THREE.Color(0x92b5c6);
-scene.fog=new THREE.Fog(0x92b5c6,45,150);
+scene.background=new THREE.Color(0x91c8dc);
+scene.fog=new THREE.Fog(0x91c8dc,35,120);
 
-const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.1,300);
-camera.position.set(0,2,13);
+const camera=new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,.1,200);
+camera.position.set(0,1.8,15);
 
 const renderer=new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(innerWidth,innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(window.innerWidth,window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
 renderer.shadowMap.enabled=true;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-renderer.xr.enabled=true;
 renderer.outputColorSpace=THREE.SRGBColorSpace;
-document.getElementById('scene').appendChild(renderer.domElement);
+renderer.xr.enabled=true;
+document.body.appendChild(renderer.domElement);
 
-scene.add(new THREE.HemisphereLight(0xe9f7ff,0x34404c,2.3));
-const sun=new THREE.DirectionalLight(0xffffff,3);
-sun.position.set(30,45,25);
-sun.castShadow=true;
-scene.add(sun);
+scene.add(new THREE.HemisphereLight(0xc8ecff,0x47403b,2));
 
-const VRButtonElement=VRButton.createButton(renderer);
-VRButtonElement.style.display='none';
-document.body.appendChild(VRButtonElement);
+const sunlight=new THREE.DirectionalLight(0xffffff,2.7);
+sunlight.position.set(-20,40,20);
+sunlight.castShadow=true;
+sunlight.shadow.mapSize.set(2048,2048);
+scene.add(sunlight);
 
 // MATERIALS
-const asphalt=new THREE.MeshStandardMaterial({color:0x30343a,roughness:1});
-const concrete=new THREE.MeshStandardMaterial({color:0x777c81,roughness:1});
-const rubbleMat=new THREE.MeshStandardMaterial({color:0x85817c,roughness:1});
-const darkWin=new THREE.MeshStandardMaterial({color:0x162b3b,roughness:.4});
-const crackMat=new THREE.LineBasicMaterial({color:0x151515});
-const roadMat=new THREE.MeshStandardMaterial({color:0x303238});
+const matRoad=new THREE.MeshStandardMaterial({color:0x303237});
+const matSidewalk=new THREE.MeshStandardMaterial({color:0x9c9b99});
+const matConcrete=new THREE.MeshStandardMaterial({color:0x88847e});
+const matWindow=new THREE.MeshStandardMaterial({
+color:0x142a3c,metalness:.15,roughness:.35
+});
+const matCrack=new THREE.MeshBasicMaterial({color:0x171717});
+const matDebris=new THREE.MeshStandardMaterial({color:0x77736e});
+const matGrass=new THREE.MeshStandardMaterial({color:0x394f36});
 
 // GROUND
-const ground=new THREE.Mesh(new THREE.PlaneGeometry(200,200),
-new THREE.MeshStandardMaterial({color:0x8d8b87}));
+const ground=new THREE.Mesh(
+new THREE.PlaneGeometry(200,200),
+new THREE.MeshStandardMaterial({color:0x85827f})
+);
 ground.rotation.x=-Math.PI/2;
-ground.position.y=-.15;
+ground.position.y=-.12;
 ground.receiveShadow=true;
 scene.add(ground);
 
 // ROAD
-const road=new THREE.Mesh(new THREE.PlaneGeometry(20,100),roadMat);
+const road=new THREE.Mesh(new THREE.PlaneGeometry(22,120),matRoad);
 road.rotation.x=-Math.PI/2;
-road.position.y=.01;
+road.position.y=0;
 road.receiveShadow=true;
 scene.add(road);
 
-// LANE MARKINGS
-for(let z=-48;z<48;z+=8){
-const dash=new THREE.Mesh(new THREE.BoxGeometry(.22,.04,3),
-new THREE.MeshStandardMaterial({color:0xffffff}));
-dash.position.set(0,.04,z);
-scene.add(dash);
+// ROAD STRIPES
+for(let z=-55;z<55;z+=8){
+const stripe=new THREE.Mesh(
+new THREE.BoxGeometry(.25,.03,3),
+new THREE.MeshStandardMaterial({color:0xffffff})
+);
+stripe.position.set(0,.04,z);
+scene.add(stripe);
 }
 
 // SIDEWALKS
-for(const side of [-1,1]){
-const walk=new THREE.Mesh(new THREE.BoxGeometry(5,.4,100),concrete);
-walk.position.set(side*12,.1,0);
-walk.receiveShadow=true;
-scene.add(walk);
+for(let s of [-1,1]){
+const sidewalk=new THREE.Mesh(
+new THREE.BoxGeometry(5,.35,120),matSidewalk
+);
+sidewalk.position.set(s*13,.12,0);
+sidewalk.receiveShadow=true;
+scene.add(sidewalk);
 }
 
 // BUILDINGS
 const buildings=[];
-function makeBuilding(x,z,w,h,d,color,damage=false){
-const g=new THREE.Group();
-const body=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),
-new THREE.MeshStandardMaterial({color,roughness:.9}));
+const colliders=[];
+
+function building(x,z,w,h,d,color,damage=false){
+const group=new THREE.Group();
+
+const material=new THREE.MeshStandardMaterial({color,roughness:.95});
+const body=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);
 body.position.y=h/2;
 body.castShadow=true;
 body.receiveShadow=true;
-g.add(body);
+group.add(body);
 
-const rows=Math.floor(h/3.2);
-const cols=Math.floor(w/2.5);
-for(let r=1;r<rows;r++){
+// WINDOWS
+const cols=Math.max(2,Math.floor(w/2.5));
+const rows=Math.max(2,Math.floor(h/3.3));
+
+for(let r=0;r<rows;r++){
 for(let c=0;c<cols;c++){
-let wx=-w/2+1.3+c*2.5;
-let wy=2.5+r*3.2;
-const win=new THREE.Mesh(new THREE.BoxGeometry(1.1,1.5,.12),darkWin);
-win.position.set(wx,wy,d/2+.07);
-g.add(win);
+const win=new THREE.Mesh(
+new THREE.BoxGeometry(1.05,1.35,.12),matWindow
+);
+win.position.set(
+-w/2+1.5+c*(w/(cols)),
+2.2+r*3.1,
+d/2+.08
+);
+group.add(win);
+
+const win2=win.clone();
+win2.position.z=-d/2-.08;
+group.add(win2);
 }
 }
 
+// FLOOR EDGES
+for(let y=3;y<h;y+=3.2){
+const edge=new THREE.Mesh(
+new THREE.BoxGeometry(w+.1,.15,d+.1),
+new THREE.MeshStandardMaterial({color:0x5f5c58})
+);
+edge.position.y=y;
+group.add(edge);
+}
+
+// DAMAGE
 if(damage){
-const scar=new THREE.Mesh(new THREE.BoxGeometry(.35,h*.65,.18),
-new THREE.MeshStandardMaterial({color:0x343434}));
-scar.position.set(w*.25,h*.55,d/2+.15);
-scar.rotation.z=.3;
-g.add(scar);
+const damagedWall=new THREE.Mesh(
+new THREE.BoxGeometry(w*.35,h*.4,.3),
+new THREE.MeshStandardMaterial({color:0x44423e})
+);
+damagedWall.position.set(w*.2,h*.75,d/2+.2);
+damagedWall.rotation.z=.2;
+group.add(damagedWall);
 }
 
-g.position.set(x,0,z);
-scene.add(g);
-buildings.push(g);
+group.position.set(x,0,z);
+scene.add(group);
+buildings.push(group);
+
+// Collision box
+colliders.push({
+x:x,
+z:z,
+w:w+1,
+d:d+1
+});
 }
 
-makeBuilding(-18,-12,12,22,12,0xaaa49b,true);
-makeBuilding(-19,-38,13,30,12,0x888a8b,true);
-makeBuilding(-17,22,12,17,12,0xaaa49b,false);
-makeBuilding(18,-15,12,26,12,0x77695e,true);
-makeBuilding(18,-40,14,32,12,0x8d8175,true);
-makeBuilding(17,22,12,19,12,0x9b968d,false);
-makeBuilding(-8,-45,8,14,9,0x8b8c91);
-makeBuilding(8,-45,8,16,9,0x8b8c91);
+building(-19,-12,14,26,12,0xaaa198,true);
+building(-19,-40,14,32,12,0x878782,true);
+building(-18,20,14,22,12,0xb4aea5);
+building(19,-12,14,30,12,0x786d62,true);
+building(19,-40,14,35,12,0x908276,true);
+building(18,20,14,24,12,0x9c958b);
+building(-8,-53,8,15,9,0x8a8c91);
+building(8,-53,8,18,9,0x9b938a);
+building(-8,45,8,18,9,0x928b83);
+building(8,45,8,16,9,0x8d8d92);
 
 // CRACKS
-function makeCrack(coords){
-const points=coords.map(p=>new THREE.Vector3(p[0],.07,p[1]));
-const line=new THREE.Line(new THREE.BufferGeometry().setFromPoints(points),crackMat);
+function crack(points){
+const line=new THREE.Line(
+new THREE.BufferGeometry().setFromPoints(
+points.map(p=>new THREE.Vector3(p[0],.08,p[1]))
+),
+matCrack
+);
 scene.add(line);
 }
-makeCrack([[-6,-20],[-4,-16],[-6,-12],[-3,-8],[1,-3],[4,0]]);
-makeCrack([[5,-40],[3,-35],[5,-30],[1,-27],[4,-20]]);
-makeCrack([[-7,3],[-5,6],[-8,10],[-4,13],[-6,17]]);
-makeCrack([[2,15],[4,18],[1,21],[4,25],[3,30]]);
-makeCrack([[-1,-35],[2,-31],[-1,-27],[3,-22]]);
 
-// EXTRA CRACK BRANCHES
-makeCrack([[-4,-14],[-8,-12],[-9,-10]]);
-makeCrack([[4,-28],[7,-26],[9,-23]]);
-makeCrack([[2,4],[0,8],[-2,11]]);
+crack([[-9,-20],[-7,-17],[-8,-13],[-5,-9],[-2,-4],[1,2]]);
+crack([[5,-38],[2,-34],[4,-30],[1,-26],[4,-21]]);
+crack([[-7,5],[-4,9],[-7,12],[-3,15],[-4,20]]);
+crack([[2,22],[4,25],[1,29],[4,33],[2,38]]);
+crack([[-1,-45],[2,-41],[-2,-36],[3,-31]]);
+crack([[8,-12],[6,-8],[9,-5],[7,0]]);
+crack([[-3,40],[-1,43],[-5,46],[-2,50]]);
 
 // DEBRIS
-function addDebris(x,z,s=1){
+function rubble(x,z,s){
 const mesh=new THREE.Mesh(
-new THREE.DodecahedronGeometry(s,0),rubbleMat);
-mesh.position.set(x,s*.5,z);
-mesh.rotation.set(Math.random()*2,Math.random()*2,Math.random()*2);
+new THREE.DodecahedronGeometry(s,0),
+matDebris
+);
+mesh.position.set(x,s*.45,z);
+mesh.rotation.set(Math.random()*3,Math.random()*3,Math.random()*3);
 mesh.castShadow=true;
 mesh.receiveShadow=true;
 scene.add(mesh);
 }
-for(let i=0;i<55;i++){
-const x=(Math.random()*28)-14;
-const z=(Math.random()*90)-45;
-if(Math.abs(x)>5.5){
-addDebris(x,z,Math.random()*1.2+.3);
+
+for(let i=0;i<100;i++){
+const x=(Math.random()*30)-15;
+const z=(Math.random()*110)-55;
+if(Math.abs(x)>6){
+rubble(x,z,.4+Math.random()*1.5);
 }
+}
+
+// BROKEN BLOCKS
+for(let i=0;i<24;i++){
+const x=(Math.random()*8)+7;
+const z=(Math.random()*30)-20;
+const block=new THREE.Mesh(
+new THREE.BoxGeometry(
+1+Math.random()*2,
+.4+Math.random()*1.2,
+1+Math.random()*2
+),
+matConcrete
+);
+block.position.set(x,Math.random()*.5,z);
+block.rotation.set(Math.random(),Math.random(),Math.random());
+block.castShadow=true;
+block.receiveShadow=true;
+scene.add(block);
 }
 
 // TREES
 function tree(x,z){
-const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.3,.5,3,8),
-new THREE.MeshStandardMaterial({color:0x634229}));
-trunk.position.set(x,1.5,z);
+const trunk=new THREE.Mesh(
+new THREE.CylinderGeometry(.35,.5,3.5,8),
+new THREE.MeshStandardMaterial({color:0x66452a})
+);
+trunk.position.set(x,1.75,z);
 trunk.castShadow=true;
 scene.add(trunk);
-const leaves=new THREE.Mesh(new THREE.SphereGeometry(2.5,16,12),
-new THREE.MeshStandardMaterial({color:0x205a32}));
-leaves.position.set(x,4.5,z);
-leaves.castShadow=true;
-scene.add(leaves);
+
+const foliage=new THREE.Mesh(
+new THREE.SphereGeometry(2.5,16,12),
+new THREE.MeshStandardMaterial({color:0x236333})
+);
+foliage.position.set(x,4.5,z);
+foliage.castShadow=true;
+scene.add(foliage);
 }
 tree(-12,-6);
-tree(12,8);
-tree(-12,27);
+tree(12,9);
+tree(-12,30);
 tree(12,-30);
+tree(-12,45);
 
 // STREET LIGHTS
 function streetLight(x,z){
-const pole=new THREE.Mesh(new THREE.CylinderGeometry(.12,.15,7,8),
-new THREE.MeshStandardMaterial({color:0x33383e}));
+const pole=new THREE.Mesh(
+new THREE.CylinderGeometry(.1,.14,7,8),
+new THREE.MeshStandardMaterial({color:0x323a40})
+);
 pole.position.set(x,3.5,z);
 scene.add(pole);
-const arm=new THREE.Mesh(new THREE.BoxGeometry(2,.12,.12),
-new THREE.MeshStandardMaterial({color:0x33383e}));
+
+const arm=new THREE.Mesh(
+new THREE.BoxGeometry(2,.12,.12),
+new THREE.MeshStandardMaterial({color:0x323a40})
+);
 arm.position.set(x+1,6.8,z);
 scene.add(arm);
-const lamp=new THREE.Mesh(new THREE.BoxGeometry(.7,.25,.4),
-new THREE.MeshStandardMaterial({color:0xffdd99,emissive:0x332211}));
+
+const lamp=new THREE.Mesh(
+new THREE.BoxGeometry(.6,.3,.4),
+new THREE.MeshStandardMaterial({color:0xffddaa,emissive:0x443322})
+);
 lamp.position.set(x+1.4,6.6,z);
 scene.add(lamp);
 }
-streetLight(-12,-18);
-streetLight(12,18);
+streetLight(-12,-20);
+streetLight(12,20);
 
-// HAZARD MARKERS
-const hazardPoints=[];
-function hazard(x,z,label){
-const group=new THREE.Group();
-const ring=new THREE.Mesh(new THREE.TorusGeometry(1.2,.12,8,32),
-new THREE.MeshStandardMaterial({color:0xff3d4e,emissive:0x660000}));
-ring.rotation.x=Math.PI/2;
-ring.position.y=.2;
-group.add(ring);
-const beacon=new THREE.Mesh(new THREE.ConeGeometry(.4,.9,8),
-new THREE.MeshStandardMaterial({color:0xff4444,emissive:0x441111}));
-beacon.position.y=1.1;
-group.add(beacon);
-group.position.set(x,0,z);
-scene.add(group);
-hazardPoints.push(group);
-}
-hazard(-6,-15);
-hazard(6,-25);
-hazard(-7,10);
+// SAFE AREA
+const safeZone=new THREE.Mesh(
+new THREE.CircleGeometry(4,32),
+new THREE.MeshBasicMaterial({color:0x00ff99,transparent:true,opacity:.25})
+);
+safeZone.rotation.x=-Math.PI/2;
+safeZone.position.set(0,.1,-48);
+scene.add(safeZone);
 
-// SAFE ZONE
-const safe=new THREE.Mesh(new THREE.CircleGeometry(3,32),
-new THREE.MeshBasicMaterial({color:0x00ff99,transparent:true,opacity:.25}));
-safe.rotation.x=-Math.PI/2;
-safe.position.set(0,.1,-38);
-scene.add(safe);
-
-const safeRing=new THREE.Mesh(new THREE.TorusGeometry(3,.15,8,32),
-new THREE.MeshBasicMaterial({color:0x00ff99}));
+const safeRing=new THREE.Mesh(
+new THREE.TorusGeometry(4,.18,8,32),
+new THREE.MeshBasicMaterial({color:0x00ff99})
+);
 safeRing.rotation.x=Math.PI/2;
-safeRing.position.set(0,.2,-38);
+safeRing.position.set(0,.15,-48);
 scene.add(safeRing);
 
-// CAMERA LOOK
-let yaw=0,pitch=0;
-let mouseDown=false,lastX=0,lastY=0;
-renderer.domElement.addEventListener('pointerdown',e=>{
-if(e.button===0){mouseDown=true;lastX=e.clientX;lastY=e.clientY}
-});
-window.addEventListener('pointerup',()=>mouseDown=false);
-window.addEventListener('pointermove',e=>{
-if(mouseDown){
-yaw-=(e.clientX-lastX)*.004;
-pitch-=(e.clientY-lastY)*.004;
-pitch=Math.max(-1.2,Math.min(1.2,pitch));
-lastX=e.clientX;lastY=e.clientY;
-}
-});
+// HAZARDS
+const hazardObjects=[];
+function hazard(x,z){
+const h=new THREE.Group();
+const ring=new THREE.Mesh(
+new THREE.TorusGeometry(1.3,.12,8,24),
+new THREE.MeshBasicMaterial({color:0xff3030})
+);
+ring.rotation.x=Math.PI/2;
+ring.position.y=.1;
+h.add(ring);
 
-// KEYBOARD
+const cone=new THREE.Mesh(
+new THREE.ConeGeometry(.5,1,8),
+new THREE.MeshStandardMaterial({color:0xff3b3b,emissive:0x551111})
+);
+cone.position.y=1;
+h.add(cone);
+h.position.set(x,0,z);
+scene.add(h);
+hazardObjects.push(h);
+}
+hazard(-7,-15);
+hazard(7,-25);
+hazard(-8,12);
+
+// PLAYER CONTROLS
+let yaw=0;
+let pitch=0;
 const keys={};
-window.addEventListener('keydown',e=>keys[e.key.toLowerCase()]=true);
-window.addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
 
-let moving=false;
-let shaking=false;
-let paused=false;
-let seconds=0;
-let intensityVal=0;
-let score=0;
-let protected=false;
-let assessed=false;
-let evacuated=false;
-let reported=false;
-let hazardsFound=0;
-let startTime=0;
-let shakeTime=0;
-let shakeDuration=20;
+window.addEventListener('keydown',e=>{
+keys[e.key.toLowerCase()]=true;
+});
+window.addEventListener('keyup',e=>{
+keys[e.key.toLowerCase()]=false;
+});
 
-const status=document.getElementById('state');
-const topState=document.getElementById('topState');
-const alert=document.getElementById('alert');
-const log=document.getElementById('eventlog');
+let pointerLocked=false;
 
-function logEvent(text){
-const item=document.createElement('div');
-item.className='logitem';
-item.textContent=new Date().toLocaleTimeString()+' · '+text;
-log.prepend(item);
+renderer.domElement.addEventListener('click',()=>{
+renderer.domElement.requestPointerLock?.();
+});
+
+document.addEventListener('pointerlockchange',()=>{
+pointerLocked=document.pointerLockElement===renderer.domElement;
+document.getElementById('pointer').textContent=
+pointerLocked?'CAMINATA ACTIVADA':'ACTIVAR CAMINATA';
+});
+
+document.addEventListener('mousemove',e=>{
+if(!pointerLocked)return;
+yaw-=e.movementX*.0025;
+pitch-=e.movementY*.0025;
+pitch=Math.max(-1.45,Math.min(1.45,pitch));
+});
+
+document.getElementById('pointer').onclick=()=>{
+renderer.domElement.requestPointerLock?.();
+};
+
+// MOVEMENT COLLISION
+function collides(pos){
+for(const c of colliders){
+if(pos.x>c.x-c.w/2&&pos.x<c.x+c.w/2&&
+pos.z>c.z-c.d/2&&pos.z<c.z+c.d/2){
+return true;
+}
+}
+return false;
 }
 
-function updateScore(){
-score=(protected?30:0)+(assessed?25:0)+(evacuated?25:0)+(reported?20:0);
-document.getElementById('score').textContent=score+' / 100';
-document.getElementById('scoreSide').textContent=score;
-if(score===100){
-document.getElementById('resultText').textContent='¡Misión completada! Excelente respuesta.';
-}else{
-document.getElementById('resultText').textContent='Completa los objetivos para mejorar tu resultado.';
-}
+// Earthquake
+let earthquake=false;
+let quakeTime=0;
+let elapsed=0;
+let quakeDuration=20;
+let originalPosition=new THREE.Vector3();
+
+const status=document.getElementById('status');
+const intensity=document.getElementById('intensity');
+const timer=document.getElementById('timer');
+const toast=document.getElementById('toast');
+
+function message(txt){
+toast.textContent=txt;
+toast.style.display='block';
+setTimeout(()=>toast.style.display='none',3000);
 }
 
-function completeTask(id){
-document.getElementById(id).classList.add('done');
-}
-
-function startQuake(){
-if(shaking)return;
-shaking=true;
-paused=false;
-shakeTime=0;
-seconds=0;
-intensityVal=7.5;
-startTime=performance.now();
+document.getElementById('earthquake').onclick=()=>{
+earthquake=true;
+quakeTime=0;
+elapsed=0;
 status.textContent='SISMO ACTIVO';
-status.className='metric-value red';
-topState.textContent='● ALERTA SÍSMICA';
-topState.className='pill live';
-alert.style.display='block';
-document.getElementById('environment').textContent='SISMO ACTIVO';
-logEvent('Se activa el evento sísmico.');
-logEvent('Aplicar protocolo: agacharse, cubrirse y sujetarse.');
-}
+status.style.color='#ff5252';
+message('¡TERREMOTO! Agáchate, cúbrete y sujétate.');
+};
 
-function stopQuake(){
-shaking=false;
-intensityVal=0;
-alert.style.display='none';
+document.getElementById('stop').onclick=()=>{
+earthquake=false;
 status.textContent='MOVIMIENTO DETENIDO';
-status.className='metric-value green';
-topState.textContent='● EVENTO DETENIDO';
-topState.className='pill';
-document.getElementById('environment').textContent='POST-SISMO';
-logEvent('Movimiento sísmico detenido.');
-}
-
-document.getElementById('start').onclick=startQuake;
-document.getElementById('pause').onclick=()=>{
-paused=!paused;
-logEvent(paused?'Simulación pausada.':'Simulación reanudada.');
+status.style.color='#55dfad';
+intensity.textContent='0.0';
+message('Movimiento detenido. Evalúa el entorno.');
 };
+
 document.getElementById('reset').onclick=()=>{
-shaking=false;paused=false;seconds=0;intensityVal=0;
-protected=false;assessed=false;evacuated=false;reported=false;
-score=0;hazardsFound=0;
-camera.position.set(0,2,13);yaw=0;pitch=0;
-status.textContent='PREPARADO';
-status.className='metric-value orange';
-topState.textContent='● SISTEMA EN ESPERA';
-topState.className='pill';
-alert.style.display='none';
-document.getElementById('environment').textContent='NORMAL';
-document.getElementById('intensity').textContent='0.0';
-document.getElementById('intbar').style.width='0%';
-document.getElementById('timer').textContent='00:00';
-document.getElementById('score').textContent='0 / 100';
-document.getElementById('scoreSide').textContent='0';
-document.getElementById('resultText').textContent='Inicia el escenario para comenzar la evaluación.';
-document.getElementById('hazards').textContent='0';
-['task1','task2','task3','task4','objective1','objective2','objective3','objective4'].forEach(id=>document.getElementById(id).classList.remove('done'));
-log.innerHTML='<div class="logitem">Simulador reiniciado.</div>';
+earthquake=false;
+quakeTime=0;
+elapsed=0;
+camera.position.set(0,1.8,15);
+yaw=0;
+pitch=0;
+status.textContent='ENTORNO NORMAL';
+status.style.color='#ffd166';
+intensity.textContent='0.0';
+timer.textContent='00:00';
+message('Escenario reiniciado.');
 };
 
-document.getElementById('protect').onclick=()=>{
-if(!shaking){
-logEvent('Protección registrada. Se recomienda practicar durante el sismo.');
-}
-protected=true;
-completeTask('task1');
-completeTask('objective1');
-score=Math.max(score,30);
-updateScore();
-logEvent('Acción de protección registrada.');
-};
-
-document.getElementById('assess').onclick=()=>{
-assessed=true;
-hazardsFound=3;
-document.getElementById('hazards').textContent=hazardsFound;
-completeTask('task2');
-completeTask('objective2');
-updateScore();
-logEvent('Evaluación visual de riesgos registrada.');
-};
-
-document.getElementById('evacuate').onclick=()=>{
-evacuated=true;
-completeTask('task3');
-completeTask('objective3');
-updateScore();
-logEvent('Evacuación simulada registrada. Dirígete a zona segura.');
-};
-
-document.getElementById('report').onclick=()=>{
-reported=true;
-completeTask('task4');
-completeTask('objective4');
-updateScore();
-logEvent('Reporte de situación registrado.');
-};
-
-document.getElementById('home').onclick=()=>{
-camera.position.set(0,2,13);yaw=0;pitch=0;
-logEvent('Posición inicial restaurada.');
-};
-
-document.getElementById('vr').onclick=()=>{
-if(renderer.xr.isPresenting){
-renderer.xr.getSession()?.end();
-}else{
-if(navigator.xr){
-renderer.xr.setSession;
-VRButtonElement.click();
-}else{
-logEvent('WebXR no disponible en este navegador. Prueba con navegador compatible y HTTPS.');
-alert('VR no está disponible en este navegador. Usa un navegador compatible con WebXR y un dispositivo VR.');
-}
-}
-};
-
-// ANIMATION
+// Animation
 const clock=new THREE.Clock();
+const camOffset=new THREE.Vector3();
+const movement=new THREE.Vector3();
+const direction=new THREE.Vector3();
+const right=new THREE.Vector3();
+
 renderer.setAnimationLoop(()=>{
 const dt=Math.min(clock.getDelta(),.05);
 const t=clock.elapsedTime;
 
-if(shaking&&!paused){
-shakeTime+=dt;
-seconds=shakeTime;
-if(shakeTime>shakeDuration){
-stopQuake();
-}
-}
+// MOVEMENT
+if(!earthquake&&!renderer.xr.isPresenting){
+const speed=keys['shift']?10:5.5;
 
-if(shaking&&!paused){
-const shakeFactor=Math.max(0,1-shakeTime/shakeDuration);
-const power=shakeFactor*.25;
-camera.position.x+=(Math.random()-.5)*power;
-camera.position.y=2+(Math.random()-.5)*power;
-camera.rotation.z=(Math.random()-.5)*power*.4;
-for(const b of buildings){
-b.rotation.z=Math.sin(t*18)*power*.02;
-}
+direction.set(-Math.sin(yaw),0,-Math.cos(yaw));
+right.set(Math.cos(yaw),0,-Math.sin(yaw));
+
+movement.set(0,0,0);
+
+if(keys['w']||keys['arrowup'])movement.add(direction);
+if(keys['s']||keys['arrowdown'])movement.sub(direction);
+if(keys['d']||keys['arrowright'])movement.add(right);
+if(keys['a']||keys['arrowleft'])movement.sub(right);
+
+if(movement.length()>0){
+movement.normalize().multiplyScalar(speed*dt);
+
+const newPos=camera.position.clone();
+newPos.add(movement);
+
+if(!collides(newPos)){
+camera.position.x=newPos.x;
+camera.position.z=newPos.z;
 }else{
-camera.rotation.z+=(0-camera.rotation.z)*.08;
+const posX=camera.position.clone();
+posX.x+=movement.x;
+if(!collides(posX))camera.position.x=posX.x;
+
+const posZ=camera.position.clone();
+posZ.z+=movement.z;
+if(!collides(posZ))camera.position.z=posZ.z;
+}
 }
 
-if(keys['w']||keys['arrowup'])moving=true;
-if(keys['s']||keys['arrowdown'])moving=true;
-if(keys['a']||keys['arrowleft'])moving=true;
-if(keys['d']||keys['arrowright'])moving=true;
-
-if(!shaking&&!renderer.xr.isPresenting){
-const direction=new THREE.Vector3(
-Math.sin(yaw),0,Math.cos(yaw)
-);
-const side=new THREE.Vector3(
-Math.cos(yaw),0,-Math.sin(yaw)
-);
-if(keys['w']||keys['arrowup'])camera.position.addScaledVector(direction,-dt*6);
-if(keys['s']||keys['arrowdown'])camera.position.addScaledVector(direction,dt*6);
-if(keys['a']||keys['arrowleft'])camera.position.addScaledVector(side,-dt*6);
-if(keys['d']||keys['arrowright'])camera.position.addScaledVector(side,dt*6);
-camera.position.y=2;
 camera.rotation.order='YXZ';
 camera.rotation.y=yaw;
 camera.rotation.x=pitch;
 }
 
-if(renderer.xr.isPresenting){
-camera.rotation.z=0;
+// EARTHQUAKE
+if(earthquake){
+quakeTime+=dt;
+elapsed+=dt;
+const factor=Math.max(0,1-quakeTime/quakeDuration);
+const shake= factor*.28;
+
+camera.position.x+= (Math.random()-.5)*shake;
+camera.position.y=1.8+(Math.random()-.5)*shake;
+camera.rotation.z=(Math.random()-.5)*shake;
+
+for(const b of buildings){
+b.rotation.z=Math.sin(t*20)*shake*.04;
+}
+if(quakeTime>=quakeDuration){
+earthquake=false;
+status.textContent='MOVIMIENTO DETENIDO';
+status.style.color='#55dfad';
+message('Sismo terminado. Evalúa riesgos.');
+}
 }
 
-document.getElementById('timer').textContent=
-String(Math.floor(seconds/60)).padStart(2,'0')+':'+
-String(Math.floor(seconds%60)).padStart(2,'0');
+// METRICS
+intensity.textContent=earthquake?
+(7.5*Math.max(0,1-quakeTime/quakeDuration)).toFixed(1):'0.0';
 
-document.getElementById('intensity').textContent=
-(shaking?Math.max(0,7.5*(1-shakeTime/shakeDuration)):0).toFixed(1);
-document.getElementById('intbar').style.width=
-(shaking?Math.max(0,100*(1-shakeTime/shakeDuration)):0)+'%';
+timer.textContent=
+String(Math.floor(elapsed/60)).padStart(2,'0')+':'+
+String(Math.floor(elapsed%60)).padStart(2,'0');
 
-safeRing.rotation.z=Math.sin(t)*.08;
-hazardPoints.forEach((h,i)=>{
-h.children[0].material.emissiveIntensity=1+Math.sin(t*3+i)*.5;
+// ANIMATION
+safeRing.rotation.z=Math.sin(t)*.1;
+
+hazardObjects.forEach((h,i)=>{
+h.rotation.y=Math.sin(t*2+i)*.2;
 });
 
 renderer.render(scene,camera);
 });
 
+// RESIZE
 window.addEventListener('resize',()=>{
-camera.aspect=innerWidth/innerHeight;
+camera.aspect=window.innerWidth/window.innerHeight;
 camera.updateProjectionMatrix();
-renderer.setSize(innerWidth,innerHeight);
+renderer.setSize(window.innerWidth,window.innerHeight);
 });
 
-logEvent('SIMUS listo. Esperando inicio del entrenamiento.');
 </script>
 </body>
 </html>
